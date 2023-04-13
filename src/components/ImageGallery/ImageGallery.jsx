@@ -1,17 +1,13 @@
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import imagesAPI from 'services/getImages';
-import React, { Component } from 'react';
+import React from 'react';
 import { List } from './ImageGallery.styled';
 import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
-import DefaultImg from 'assets/pbsh.png';
 import { Loader } from '../Loader/Loader';
 import ImageErrorView from 'components/ImageErrorView/ImageErrorView';
 import { InitialStateGallery } from '../InitialStateGallery/InitialStateGallery';
 import { Button } from 'components/Button/Button';
-import Modal from 'components/Modal/Modal';
-
-// import { toast } from 'react-toastify';
-// import { notifyOptions } from '../notify/notify';
 
 const Status = {
   IDLE: 'idle',
@@ -20,136 +16,182 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-export default class ImageGallery extends Component {
-  static propTypes = {
-    value: PropTypes.string.isRequired,
-  };
+export const ImageGallery = ({ value, page, onLoadMore }) => {
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState(Status.IDLE);
+  const [totalPages, setTotalPages] = useState(0);
 
-  state = {
-    value: '',
-    images: [],
-    error: null,
-    status: Status.IDLE,
-
-    page: 1,
-    totalPages: 0,
-
-    isShowModal: false,
-    modalData: { img: DefaultImg, tags: '' },
-  };
-
-  // перевіряємо, щоб в пропсах змінився запит
-  // y static відсутній this, тому дублюємо в state - search: ''
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (prevState.value !== nextProps.value) {
-      return { page: 1, value: nextProps.value };
+  useEffect(() => {
+    if (!value) {
+      return;
     }
-    return null;
+    if (page === 1) {
+      setImages([]);
+    }
+
+    setStatus(Status.PENDING);
+
+    imagesAPI
+      .getImages(value, page)
+      .then(images => {
+        setImages(prevState => [...prevState, ...images.hits]);
+        setTotalPages(Math.floor(images.totalHits / 12));
+        setStatus(Status.RESOLVED);
+      })
+      .catch(error => {
+        setError(error);
+        setStatus(Status.REJECTED);
+      });
+  }, [value, page, onLoadMore]);
+
+  if (status === Status.IDLE) {
+    return <InitialStateGallery text="Let`s find images together!" />;
+  }
+  if (status === Status.PENDING) {
+    return <Loader />;
+  }
+  if (status === Status.REJECTED) {
+    return <ImageErrorView message={error.message} />;
+  }
+  if (images.length === 0) {
+    return (
+      <ImageErrorView
+        message={`Oops... there are no images matching your search... `}
+      />
+    );
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { page } = this.state;
-    const prevValue = prevProps.value;
-    const nextValue = this.props.value;
-    //console.log(nextValue);
-    //   страхуємо від повторного запиту, якщо вже таке слово було введене
-    if (prevValue !== nextValue || prevState.page !== page) {
-      // console.log('prevValue:', prevValue);
-      //console.log('nextValue:', nextValue);
-      this.setState({ status: Status.PENDING });
-
-      // перевіряємо чи є помилка, якщо є - записуємо null
-      if (this.state.error) {
-        this.setState({ error: null });
-      }
-      imagesAPI
-        .getImages(nextValue, page)
-        .then(images => {
-          //  this.showNotifications(images);
-          this.setState(prevState => ({
-            images:
-              page === 1 ? images.hits : [...prevState.images, ...images.hits],
-            status: Status.RESOLVED,
-            totalPages: Math.floor(images.totalHits / 12),
-          }));
-          // console.log(this.state.images);
-        })
-        .catch(error => this.setState({ error, status: Status.REJECTED }));
-    }
+  if (status === Status.RESOLVED) {
+    return (
+      <>
+        <List>
+          {images.map(image => (
+            <ImageGalleryItem key={image.id} item={image} />
+          ))}
+        </List>
+        {images.length > 0 &&
+          status !== Status.PENDING &&
+          page <= totalPages && <Button onClick={onLoadMore}>Load More</Button>}
+      </>
+    );
   }
+};
 
-  // custom method to btn load
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
+ImageGallery.propTypes = {
+  value: PropTypes.string.isRequired,
+  page: PropTypes.number.isRequired,
+  onLoadMore: PropTypes.func.isRequired,
+};
 
-  setModalData = modalData => {
-    this.setState({ modalData, isShowModal: true });
-  };
+// export default class ImageGallery extends Component {
+//   static propTypes = {
+//     value: PropTypes.string.isRequired,
+//   };
 
-  handleModalClose = () => {
-    this.setState({ isShowModal: false });
-  };
+//   state = {
+//     value: '',
+//     images: [],
+//     error: null,
+//     status: Status.IDLE,
 
-  // custom method for notifications
-  // showNotifications = images => {
-  //   if (this.state.page === 1) {
-  //     images.hits.lenth > 0
-  //       ? toast.success(
-  //           `Hooray! We found ${images.total} images.`,
-  //           notifyOptions
-  //         )
-  //       : toast.warn(
-  //           `Sorry, but there are no results for your query`,
-  //           notifyOptions
-  //         );
-  //   }
-  // };
+//     page: 1,
+//     totalPages: 0,
 
-  render() {
-    const { images, error, status, page, totalPages, isShowModal, modalData } =
-      this.state;
-    //console.log('images: ', images);
+//     isShowModal: false,
+//     modalData: { img: DefaultImg, tags: '' },
+//   };
 
-    if (status === 'idle') {
-      return <InitialStateGallery text="Let`s find images together!" />;
-    }
-    if (status === 'pending') {
-      return <Loader />;
-    }
-    if (status === 'rejected') {
-      return <ImageErrorView message={error.message} />;
-    }
-    if (images.length === 0) {
-      return (
-        <ImageErrorView
-          message={`Oops... there are no images matching your search... `}
-        />
-      );
-    }
+//   static getDerivedStateFromProps(nextProps, prevState) {
+//     if (prevState.value !== nextProps.value) {
+//       return { page: 1, value: nextProps.value };
+//     }
+//     return null;
+//   }
 
-    if (status === 'resolved') {
-      return (
-        <>
-          <List>
-            {images.map(image => (
-              <ImageGalleryItem
-                key={image.id}
-                item={image}
-                onImageClick={this.setModalData}
-              />
-            ))}
-          </List>
-          {images.length > 0 && status !== 'pending' && page <= totalPages && (
-            <Button status="load" onClick={this.handleLoadMore}>
-              Load More
-            </Button>
-          )}
-          {isShowModal && (
-            <Modal modalData={modalData} onModalClose={this.handleModalClose} />
-          )}
-        </>
-      );
-    }
-  }
-}
+//   componentDidUpdate(prevProps, prevState) {
+//     const { page } = this.state;
+//     const prevValue = prevProps.value;
+//     const nextValue = this.props.value;
+
+//     if (prevValue !== nextValue || prevState.page !== page) {
+
+//       this.setState({ status: Status.PENDING });
+
+//       if (this.state.error) {
+//         this.setState({ error: null });
+//       }
+//       imagesAPI
+//         .getImages(nextValue, page)
+//         .then(images => {
+
+//           this.setState(prevState => ({
+//             images:
+//               page === 1 ? images.hits : [...prevState.images, ...images.hits],
+//             status: Status.RESOLVED,
+//             totalPages: Math.floor(images.totalHits / 12),
+//           }));
+//
+//         })
+//         .catch(error => this.setState({ error, status: Status.REJECTED }));
+//     }
+//   }
+
+//   handleLoadMore = () => {
+//     this.setState(prevState => ({ page: prevState.page + 1 }));
+//   };
+
+//   setModalData = modalData => {
+//     this.setState({ modalData, isShowModal: true });
+//   };
+
+//   handleModalClose = () => {
+//     this.setState({ isShowModal: false });
+//   };
+
+//   render() {
+//     const { images, error, status, page, totalPages, isShowModal, modalData } =
+//       this.state;
+
+//     if (status === 'idle') {
+//       return <InitialStateGallery text="Let`s find images together!" />;
+//     }
+//     if (status === 'pending') {
+//       return <Loader />;
+//     }
+//     if (status === 'rejected') {
+//       return <ImageErrorView message={error.message} />;
+//     }
+//     if (images.length === 0) {
+//       return (
+//         <ImageErrorView
+//           message={`Oops... there are no images matching your search... `}
+//         />
+//       );
+//     }
+
+//     if (status === 'resolved') {
+//       return (
+//         <>
+//           <List>
+//             {images.map(image => (
+//               <ImageGalleryItem
+//                 key={image.id}
+//                 item={image}
+//                 onImageClick={this.setModalData}
+//               />
+//             ))}
+//           </List>
+//           {images.length > 0 && status !== 'pending' && page <= totalPages && (
+//             <Button status="load" onClick={this.handleLoadMore}>
+//               Load More
+//             </Button>
+//           )}
+//           {isShowModal && (
+//             <Modal modalData={modalData} onModalClose={this.handleModalClose} />
+//           )}
+//         </>
+//       );
+//     }
+//   }
+// }
