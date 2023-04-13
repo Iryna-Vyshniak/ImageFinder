@@ -6,7 +6,7 @@ import { Modal } from 'components/Modal/Modal';
 
 export const ImageGalleryItem = ({ item }) => {
   const { largeImageURL, tags, webformatURL } = item;
-  //console.log(item);
+
   const [showModal, setShowModal] = useState(false);
 
   const toggleModal = () => {

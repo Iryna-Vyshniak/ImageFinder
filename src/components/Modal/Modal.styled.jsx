@@ -18,9 +18,14 @@ export const ModalContent = styled.div`
   //max-width: calc(100vw - 48px);
   //min-height: calc(100vh - 48px);
   width: 65vw;
+  max-width: 650px;
   height: 650px;
 
   border-radius: 3px;
   box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
     0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 300ms, transform 300ms;
 `;

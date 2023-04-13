@@ -6,7 +6,10 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { TiMediaEjectOutline } from 'react-icons/ti';
 import { Layout } from './Layout/Layout';
+import { BtnScrollToTop } from './App.styled';
 
 export const App = () => {
   const [textSearch, setTextSearch] = useState('');
@@ -32,6 +35,23 @@ export const App = () => {
           onLoadMore={handleLoadMore}
         />
       </Layout>
+      <BtnScrollToTop
+        showUnder={120}
+        style={{
+          bottom: 35,
+          backgroundColor: 'rgba(185, 228, 201, 0.8)',
+          padding: '8px',
+          borderRadius: '8px',
+          boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        <TiMediaEjectOutline
+          size="24"
+          fill="#FD5523"
+          strokeWidth="0.2px"
+          stroke="#fff"
+        />
+      </BtnScrollToTop>
       <ToastContainer transition={Slide} draggablePercent={60} />
       <GlobalStyle />
     </>

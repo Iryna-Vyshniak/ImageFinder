@@ -8,6 +8,13 @@ import { Loader } from '../Loader/Loader';
 import ImageErrorView from 'components/ImageErrorView/ImageErrorView';
 import { InitialStateGallery } from '../InitialStateGallery/InitialStateGallery';
 import { Button } from 'components/Button/Button';
+import { errorMessages } from 'utils/errorMessages';
+import { AlwaysScrollToBottom } from 'components/AlwaysScrollToBottom/AlwaysScrollToBottom';
+
+// import ScrollToBottom, {
+//   useScrollToBottom,
+//   useSticky,
+// } from 'react-scroll-to-bottom';
 
 const Status = {
   IDLE: 'idle',
@@ -23,6 +30,7 @@ export const ImageGallery = ({ value, page, onLoadMore }) => {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
+    // якщо немає пошукового запиту - пошук не відбувається
     if (!value) {
       return;
     }
@@ -55,11 +63,7 @@ export const ImageGallery = ({ value, page, onLoadMore }) => {
     return <ImageErrorView message={error.message} />;
   }
   if (images.length === 0) {
-    return (
-      <ImageErrorView
-        message={`Oops... there are no images matching your search... `}
-      />
-    );
+    return <ImageErrorView message={errorMessages.imagesAPI} />;
   }
 
   if (status === Status.RESOLVED) {
@@ -73,6 +77,7 @@ export const ImageGallery = ({ value, page, onLoadMore }) => {
         {images.length > 0 &&
           status !== Status.PENDING &&
           page <= totalPages && <Button onClick={onLoadMore}>Load More</Button>}
+        <AlwaysScrollToBottom />
       </>
     );
   }
@@ -195,3 +200,18 @@ ImageGallery.propTypes = {
 //     }
 //   }
 // }
+
+// !for infinity scroll
+// const [offset, setOffset] = useState(0);
+// useEffect(() => {
+//   const handleScroll = e => {
+//     const scrollHeight = e.target.documentElement.scrollHeight;
+//     const currentHeight =
+//       e.target.documentElement.scrollTop + window.innerHeight;
+//     if (currentHeight + 1 >= scrollHeight) {
+//       setOffset(offset + 10);
+//     }
+//   };
+//   window.addEventListener('scroll', handleScroll);
+//   return () => window.removeEventListener('scroll', handleScroll);
+// }, [offset]);

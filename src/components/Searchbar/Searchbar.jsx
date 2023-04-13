@@ -7,7 +7,7 @@ import {
 } from './Searchbar.styled';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
-import { notifyOptions } from '../notify/notify';
+import { notifyOptions } from 'utils/notify';
 import PropTypes from 'prop-types';
 
 export const Searchbar = ({ onSubmit }) => {
