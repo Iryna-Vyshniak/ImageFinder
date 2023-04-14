@@ -9,12 +9,6 @@ import ImageErrorView from 'components/ImageErrorView/ImageErrorView';
 import { InitialStateGallery } from '../InitialStateGallery/InitialStateGallery';
 import { Button } from 'components/Button/Button';
 import { errorMessages } from 'utils/errorMessages';
-import { AlwaysScrollToBottom } from 'components/AlwaysScrollToBottom/AlwaysScrollToBottom';
-
-// import ScrollToBottom, {
-//   useScrollToBottom,
-//   useSticky,
-// } from 'react-scroll-to-bottom';
 
 const Status = {
   IDLE: 'idle',
@@ -57,7 +51,17 @@ export const ImageGallery = ({ value, page, onLoadMore }) => {
     return <InitialStateGallery text="Let`s find images together!" />;
   }
   if (status === Status.PENDING) {
-    return <Loader />;
+    // дозавантаження картинок до вже знайдених + картинка-лоадер, поки дозавантажуються зображення
+    return (
+      <>
+        <List>
+          {images.map(image => (
+            <ImageGalleryItem key={image.id} item={image} />
+          ))}
+        </List>
+        <Loader />;
+      </>
+    );
   }
   if (status === Status.REJECTED) {
     return <ImageErrorView message={error.message} />;
@@ -77,7 +81,6 @@ export const ImageGallery = ({ value, page, onLoadMore }) => {
         {images.length > 0 &&
           status !== Status.PENDING &&
           page <= totalPages && <Button onClick={onLoadMore}>Load More</Button>}
-        <AlwaysScrollToBottom />
       </>
     );
   }
