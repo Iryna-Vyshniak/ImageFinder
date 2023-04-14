@@ -4,7 +4,8 @@ import { GlobalStyle } from './GlobalStyle';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 
-import { ToastContainer, Slide } from 'react-toastify';
+import { ToastContainer, Slide, toast } from 'react-toastify';
+import { notifyOptions } from 'utils/notify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { TiMediaEjectOutline } from 'react-icons/ti';
@@ -15,8 +16,15 @@ export const App = () => {
   const [textSearch, setTextSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  const handleSearchSubmit = textSearch => {
-    setTextSearch(textSearch);
+  const handleSearchSubmit = value => {
+    if (value === textSearch) {
+      return toast.warn(
+        `We already found images for ${value.toUpperCase()}.
+         Please, enter another phrase`,
+        notifyOptions
+      );
+    }
+    setTextSearch(value);
     setPage(1);
   };
 
