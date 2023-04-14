@@ -12,7 +12,7 @@ export const LoaderBackdrop = styled.div`
 
   width: 100vw;
   height: 100vh;
-  background-color: rgba(185, 228, 201, 0.2);
+  background-color: rgba(185, 228, 201, 0.7);
 `;
 
 export const PendingDog = styled.img`
