@@ -16,6 +16,7 @@ export const App = () => {
   const [textSearch, setTextSearch] = useState('');
   const [page, setPage] = useState(1);
 
+  // якщо картинки по введеному слову знайдені - повторний запит при такому ж слові не відбувається; інакше - новий запит по новому слову та встановлення пошуку з 1 сторінки
   const handleSearchSubmit = value => {
     if (value === textSearch) {
       return toast.warn(
@@ -65,29 +66,3 @@ export const App = () => {
     </>
   );
 };
-
-// export default class App extends Component {
-
-//   state = {
-//     textSearch: '',
-//   };
-
-//   handleSubmit = textSearch => {
-//     this.setState({ textSearch });
-//   };
-
-//   render() {
-//     const { textSearch } = this.state;
-
-//     return (
-//       <>
-//         <Searchbar onSubmit={this.handleSubmit} />
-//         <Layout>
-//           <ImageGallery value={textSearch} />
-//         </Layout>
-//         <ToastContainer transition={Slide} draggablePercent={60} />
-//         <GlobalStyle />
-//       </>
-//     );
-//   }
-// }
