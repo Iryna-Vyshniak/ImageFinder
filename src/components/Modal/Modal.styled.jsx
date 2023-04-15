@@ -4,6 +4,8 @@ export const ModalBackdrop = styled.div`
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1200;
+
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
@@ -17,8 +19,7 @@ export const ModalContent = styled.div`
 
   //max-width: calc(100vw - 48px);
   //min-height: calc(100vh - 48px);
-  width: 65vw;
-  max-width: 650px;
+  max-width: 85vw;
   height: 650px;
 
   border-radius: 3px;
